@@ -1,6 +1,6 @@
 import{ Packet } from "nethandler";
 
-export interface IWebSocket{
+export interface IWebSocketClient{
 
     Connect(): void;
     Send(packet: Packet): void;

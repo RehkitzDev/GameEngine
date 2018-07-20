@@ -1,31 +1,31 @@
-import { GameObject } from "./GameObject/GameObject";
+import { NetGameObject } from "./gameobject/NetGameObject";
 import { LinesMesh } from "babylonjs";
 import { AssetFactory } from "./AssetFactory";
+import { GameObject } from "./gameobject/GameObject";
 
 export class GameObjectManager{
 
     private assetFactory: AssetFactory;
-    private gameObjects: Map<number,GameObject>;
-    private networkedGameObjects: Map<number,GameObject>;
+    private gameObjects: Array<GameObject>;
+    private networkedGameObjects: Map<number,NetGameObject>;
 
     constructor(assetFactory: AssetFactory){
         this.assetFactory = assetFactory;
-        this.gameObjects = new Map<number,GameObject>();
-        this.networkedGameObjects = new Map<number,GameObject>();
+        this.gameObjects = new Array<GameObject>();
+        this.networkedGameObjects = new Map<number,NetGameObject>();
     }
 
-    public addNetworkedGameObject(gameObject: GameObject){
+    public addNetworkedGameObject(gameObject: NetGameObject){
         if(!this.networkedGameObjects.has(gameObject.getId()))
             this.networkedGameObjects.set(gameObject.getId(),gameObject);
     }
 
 
     public addOfflineGameObject(gameObject: GameObject){
-        if(!this.gameObjects.has(gameObject.getId()))
-            this.gameObjects.set(gameObject.getId(),gameObject);
+        this.gameObjects.push(gameObject);
     }
 
-    public removeNetworkedGameObject(gameObject: GameObject){
+    public removeNetworkedGameObject(gameObject: NetGameObject){
         if(this.networkedGameObjects.has(gameObject.getId())){
             gameObject.getMesh().dispose();
             this.networkedGameObjects.delete(gameObject.getId())
@@ -33,14 +33,11 @@ export class GameObjectManager{
     }
 
     public removeGameObject(gameObject: GameObject){
-        if(this.gameObjects.has(gameObject.getId())){
-            gameObject.getMesh().dispose();
-            this.gameObjects.delete(gameObject.getId())
-        }
+            this.gameObjects = this.gameObjects.filter(g => g != gameObject);    
     }
 
     public Update(deletaTime: number){
-        this.gameObjects.forEach((gameObject: GameObject, id: number) => {
+        this.gameObjects.forEach((gameObject: GameObject) => {
             gameObject.Update(deletaTime);
         });
 
