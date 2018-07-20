@@ -1,0 +1,21 @@
+{
+  "name": "gameengine",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/ws": "^5.1.2",
+    "babylonjs": "^3.2.0",
+    "babylonjs-loaders": "^3.2.0",
+    "nethandler": "^1.0.15",
+    "ws": "^5.2.2"
+  },
+  "description": "",
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  }
+}
