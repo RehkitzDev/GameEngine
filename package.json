@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.16.0",
     "@types/ws": "^5.1.2",
     "babylonjs": "^3.2.0",
     "babylonjs-loaders": "^3.2.0",
@@ -16,6 +17,11 @@
   },
   "description": "",
   "devDependencies": {
+    "babel-core": "^6.26.3",
     "typescript": "^2.9.2"
+  },
+  "browserslist": {
+    "development": ">2%, last 1 edge versions, not ie > 0, not op_mini all",
+    "production": ">2%, last 1 edge versions, not ie > 0, not op_mini all"
   }
 }

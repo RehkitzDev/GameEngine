@@ -1,7 +1,7 @@
-import { Engine, Scene,AssetsManager, NullEngine } from "babylonjs";
-import { IWebSocket } from "./networking/IWebSocketClient";
+import { Engine, Scene,AssetsManager, NullEngine, AbstractAssetTask } from "babylonjs";
 import { AssetFactory } from "./AssetFactory";
 import { GameObjectManager } from "./GameObjectManager";
+import { IWebSocket } from "./networking/IWebSocket";
 
 export class REngine{
     
@@ -21,7 +21,7 @@ export class REngine{
         this.assetManager = new AssetsManager(this.scene);
         this.assetFactory = null;
         this.gameObjectManager = null;
-        this.assetManager.onFinish = this.init;
+        this.assetManager.onFinish = (tasks: AbstractAssetTask[]) => {  this.init(); };
     }
 
     public getDeltaTime(): number{

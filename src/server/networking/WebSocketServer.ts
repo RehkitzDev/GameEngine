@@ -1,3 +1,4 @@
+import * as http from "http";
 import * as ws from "ws";
 import { IWebSocket } from "../../core/networking/IWebSocket";
 import{ Packet, NetHandler, DataTypes } from "nethandler";
@@ -21,11 +22,14 @@ export class WebSocketServer extends NetHandler implements IWebSocket{
 
     public Connect(): void {
         this.wsServer = new ws.Server({port: this.port});
-        this.wsServer.addListener("connection", this.onPlayerConnection);
+        this.wsServer.on("listening", () => { console.log("websocket listening on port "+ this.port); });
+        this.wsServer.addListener("connection", this.onPlayerConnection); 
     }
 
     private onPlayerConnection(ws: WebSocket){
         console.log("websocket connection");
+        console.log(ws);
+        //ws.addEventListener("message")
     }
 
     private onPlayerMessage(){

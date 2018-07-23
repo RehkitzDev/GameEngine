@@ -4,14 +4,9 @@ import { WebSocketServer } from "./networking/WebSocketServer";
 
 export class RServer extends REngine{
 
-    constructor(){
-        super(new NullEngine(),new WebSocketServer(1337));
+    constructor(port: number){
+        super(new NullEngine(),new WebSocketServer(port));
         console.log("success");
     }
 
 }
-
-
-window.addEventListener('DOMContentLoaded', function(){ 
-    let server = new RServer();
-});

@@ -33,7 +33,8 @@ export class GameObjectManager{
     }
 
     public removeGameObject(gameObject: GameObject){
-            this.gameObjects = this.gameObjects.filter(g => g != gameObject);    
+        gameObject.getMesh().dispose();
+        this.gameObjects = this.gameObjects.filter(g => g != gameObject);    
     }
 
     public Update(deletaTime: number){
