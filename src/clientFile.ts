@@ -1,4 +1,4 @@
-import { RClient } from "../src/client/RClient";
+import { RClient } from "./client/RClient";
 
 window.addEventListener('DOMContentLoaded', function(){ 
     let canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;

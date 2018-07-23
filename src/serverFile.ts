@@ -1,4 +1,4 @@
-import { RServer } from "../src/server/RServer";
+import { RServer } from "./server/RServer";
 
 
 
