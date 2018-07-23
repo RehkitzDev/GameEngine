@@ -1,15 +1,13 @@
 import * as http from "http";
 import * as ws from "ws";
-import { IWebSocket } from "../../core/networking/IWebSocket";
 import{ Packet, NetHandler, DataTypes } from "nethandler";
 import { Server } from "http";
-import { IWebSocketClient } from "../../core/networking/IWebSocketClient";
+import { RWebSocket } from "../../core/networking/RWebSocket";
 
 
 
-export class WebSocketServer extends NetHandler implements IWebSocket{
+export class WebSocketServer extends RWebSocket{
 
-    private players: Map<number, WebSocket>;
     private wsServer: ws.Server | null;
     private port: number;
 
@@ -17,10 +15,9 @@ export class WebSocketServer extends NetHandler implements IWebSocket{
         super();
         this.wsServer = null;
         this.port = port;
-        this.players = new Map<number,WebSocket>();
     }
 
-    public Connect(): void {
+    public connect(): void {
         this.wsServer = new ws.Server({port: this.port});
         this.wsServer.on("listening", () => { console.log("websocket listening on port "+ this.port); });
         this.wsServer.addListener("connection", this.onPlayerConnection); 
@@ -38,7 +35,7 @@ export class WebSocketServer extends NetHandler implements IWebSocket{
 
     private getFreeId() : number{
         for(let i=0; i < 65535; i++)
-            if(!this.players.has(i))
+            if(!this.connectedPlayers.has(i))
                 return i;
         return -1;
     }

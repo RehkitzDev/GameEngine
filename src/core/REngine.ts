@@ -1,7 +1,7 @@
 import { Engine, Scene,AssetsManager, NullEngine, AbstractAssetTask } from "babylonjs";
 import { AssetFactory } from "./AssetFactory";
 import { GameObjectManager } from "./GameObjectManager";
-import { IWebSocket } from "./networking/IWebSocket";
+import { RWebSocket } from "./networking/RWebSocket";
 
 export class REngine{
     
@@ -11,9 +11,9 @@ export class REngine{
     private assetManager: AssetsManager;
     private gameObjectManager: GameObjectManager | null;
     private assetFactory: AssetFactory | null;
-    private webSocket: IWebSocket;
+    private webSocket: RWebSocket;
 
-    constructor(babylonEngine: Engine, ws: IWebSocket){
+    constructor(babylonEngine: Engine, ws: RWebSocket){
         this.babylonEngine = babylonEngine;
         this.webSocket = ws;
 
@@ -41,13 +41,13 @@ export class REngine{
     }
 
     public Update(deltaTime: number){
-        this.gameObjectManager!.Update(deltaTime);
+        this.gameObjectManager!.update(deltaTime);
     }
 
     private init(){
         this.assetFactory = new AssetFactory(this.scene);
         this.gameObjectManager = new GameObjectManager(this.assetFactory);
-        this.webSocket.Connect();
+        this.webSocket.connect();
 
         this.scene.onBeforeRenderObservable.add(() => {
             this.Update(this.getDeltaTime());

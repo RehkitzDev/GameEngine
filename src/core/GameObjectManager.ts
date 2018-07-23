@@ -37,7 +37,7 @@ export class GameObjectManager{
         this.gameObjects = this.gameObjects.filter(g => g != gameObject);    
     }
 
-    public Update(deletaTime: number){
+    public update(deletaTime: number){
         this.gameObjects.forEach((gameObject: GameObject) => {
             gameObject.Update(deletaTime);
         });

@@ -1,17 +1,18 @@
-import { IWebSocket } from "../../core/networking/IWebSocket";
+import { RWebSocket } from "../../core/networking/RWebSocket";
 import { Packet } from "nethandler";
 
-export class WebSocketClient implements IWebSocket{
+export class WebSocketClient extends RWebSocket{
 
     private websocketUrl: string;
     private socket: WebSocket | null;
 
     constructor(websocketUrl: string){
+        super();
         this.websocketUrl = websocketUrl;
         this.socket = null;
     }
 
-    Connect(): void {
+    connect(): void {
         this.socket = new WebSocket(this.websocketUrl);
     }
 

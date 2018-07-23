@@ -1,13 +1,12 @@
 import { Packet } from "nethandler";
-import { IWebSocketClient } from "../../core/networking/IWebSocketClient";
+import { ConnectedPlayer } from "../../core/networking/ConnectedPlayer";
 
-export class WebSocketClient implements IWebSocketClient{
+export class WebSocketClient extends ConnectedPlayer{
 
-    
-    GetId(): number {
-        return -1;
+    constructor(clientId: number){
+        super(clientId);
     }
-
+    
     Send(packet: Packet){
         
     }
