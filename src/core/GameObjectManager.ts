@@ -2,17 +2,34 @@ import { NetGameObject } from "./gameobject/NetGameObject";
 import { LinesMesh } from "babylonjs";
 import { AssetFactory } from "./AssetFactory";
 import { GameObject } from "./gameobject/GameObject";
+import { ConnectedPlayer } from "./networking/ConnectedPlayer";
 
 export class GameObjectManager{
 
-    private assetFactory: AssetFactory;
-    private gameObjects: Array<GameObject>;
-    private networkedGameObjects: Map<number,NetGameObject>;
+    protected assetFactory: AssetFactory;
+    protected gameObjects: Array<GameObject>;
+    protected networkedGameObjects: Map<number,NetGameObject>;
+    protected connectedPlayers: Map<number, ConnectedPlayer>;
 
     constructor(assetFactory: AssetFactory){
         this.assetFactory = assetFactory;
         this.gameObjects = new Array<GameObject>();
         this.networkedGameObjects = new Map<number,NetGameObject>();
+        this.connectedPlayers = new Map<number, ConnectedPlayer>();
+    }
+
+    public getFreePlayerId(): number{
+        for(let i=0; i < 65535; i++)
+            if(!this.connectedPlayers.has(i))
+                return i;
+        return -1;
+    }
+
+    public getFreeGameObjectId(): number{
+        for(let i=0; i < 65535; i++)
+            if(!this.networkedGameObjects.has(i))
+                return i;
+        return -1;
     }
 
     public addNetworkedGameObject(gameObject: NetGameObject){

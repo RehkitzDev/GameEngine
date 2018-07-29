@@ -136,6 +136,15 @@ class GameObjectManager {
         this.assetFactory = assetFactory;
         this.gameObjects = new Array();
         this.networkedGameObjects = new Map();
+        this.connectedPlayers = new Map();
+    }
+    getFreePlayerId() {
+        for (let i = 0; i < 65535; i++) if (!this.connectedPlayers.has(i)) return i;
+        return -1;
+    }
+    getFreeGameObjectId() {
+        for (let i = 0; i < 65535; i++) if (!this.networkedGameObjects.has(i)) return i;
+        return -1;
     }
     addNetworkedGameObject(gameObject) {
         if (!this.networkedGameObjects.has(gameObject.getId())) this.networkedGameObjects.set(gameObject.getId(), gameObject);
@@ -153,7 +162,7 @@ class GameObjectManager {
         gameObject.getMesh().dispose();
         this.gameObjects = this.gameObjects.filter(g => g != gameObject);
     }
-    Update(deletaTime) {
+    update(deletaTime) {
         this.gameObjects.forEach(gameObject => {
             gameObject.Update(deletaTime);
         });
@@ -195,12 +204,12 @@ class REngine {
         return this.gameObjectManager;
     }
     Update(deltaTime) {
-        this.gameObjectManager.Update(deltaTime);
+        this.gameObjectManager.update(deltaTime);
     }
     init() {
         this.assetFactory = new AssetFactory_1.AssetFactory(this.scene);
         this.gameObjectManager = new GameObjectManager_1.GameObjectManager(this.assetFactory);
-        this.webSocket.Connect();
+        this.webSocket.connect();
         this.scene.onBeforeRenderObservable.add(() => {
             this.Update(this.getDeltaTime());
         });
@@ -210,7 +219,13 @@ class REngine {
     }
 }
 exports.REngine = REngine;
-},{"./AssetFactory":"core\\AssetFactory.ts","./GameObjectManager":"core\\GameObjectManager.ts"}],"server\\networking\\WebSocketServer.ts":[function(require,module,exports) {
+},{"./AssetFactory":"core\\AssetFactory.ts","./GameObjectManager":"core\\GameObjectManager.ts"}],"core\\networking\\RWebSocket.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RWebSocket {}
+exports.RWebSocket = RWebSocket;
+},{}],"server\\networking\\WebSocketServer.ts":[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -222,15 +237,15 @@ var __importStar = this && this.__importStar || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws = __importStar(require("ws"));
-const nethandler_1 = require("nethandler");
-class WebSocketServer extends nethandler_1.NetHandler {
-    constructor(port) {
+const RWebSocket_1 = require("../../core/networking/RWebSocket");
+class WebSocketServer extends RWebSocket_1.RWebSocket {
+    constructor(port, gameObjectManager) {
         super();
         this.wsServer = null;
         this.port = port;
-        this.players = new Map();
+        this.gameObjectManager = gameObjectManager;
     }
-    Connect() {
+    connect() {
         this.wsServer = new ws.Server({ port: this.port });
         this.wsServer.on("listening", () => {
             console.log("websocket listening on port " + this.port);
@@ -243,13 +258,9 @@ class WebSocketServer extends nethandler_1.NetHandler {
         //ws.addEventListener("message")
     }
     onPlayerMessage() {}
-    getFreeId() {
-        for (let i = 0; i < 65535; i++) if (!this.players.has(i)) return i;
-        return -1;
-    }
 }
 exports.WebSocketServer = WebSocketServer;
-},{}],"server\\RServer.ts":[function(require,module,exports) {
+},{"../../core/networking/RWebSocket":"core\\networking\\RWebSocket.ts"}],"server\\RServer.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -267,9 +278,9 @@ exports.RServer = RServer;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const RServer_1 = require("../src/server/RServer");
+const RServer_1 = require("./server/RServer");
 let rserver = new RServer_1.RServer(1337);
 rserver.getAssetManager().load();
 //README: "parcel --target=node dist/serverfile.js" BEI NODE ENV
-},{"../src/server/RServer":"server\\RServer.ts"}]},{},["serverfile.ts"], null)
+},{"./server/RServer":"server\\RServer.ts"}]},{},["serverfile.ts"], null)
 //# sourceMappingURL=/serverfile.map

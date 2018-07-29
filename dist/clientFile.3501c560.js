@@ -199,6 +199,15 @@ class GameObjectManager {
         this.assetFactory = assetFactory;
         this.gameObjects = new Array();
         this.networkedGameObjects = new Map();
+        this.connectedPlayers = new Map();
+    }
+    getFreePlayerId() {
+        for (let i = 0; i < 65535; i++) if (!this.connectedPlayers.has(i)) return i;
+        return -1;
+    }
+    getFreeGameObjectId() {
+        for (let i = 0; i < 65535; i++) if (!this.networkedGameObjects.has(i)) return i;
+        return -1;
     }
     addNetworkedGameObject(gameObject) {
         if (!this.networkedGameObjects.has(gameObject.getId())) this.networkedGameObjects.set(gameObject.getId(), gameObject);
@@ -216,7 +225,7 @@ class GameObjectManager {
         gameObject.getMesh().dispose();
         this.gameObjects = this.gameObjects.filter(g => g != gameObject);
     }
-    Update(deletaTime) {
+    update(deletaTime) {
         this.gameObjects.forEach(gameObject => {
             gameObject.Update(deletaTime);
         });
@@ -258,12 +267,12 @@ class REngine {
         return this.gameObjectManager;
     }
     Update(deltaTime) {
-        this.gameObjectManager.Update(deltaTime);
+        this.gameObjectManager.update(deltaTime);
     }
     init() {
         this.assetFactory = new AssetFactory_1.AssetFactory(this.scene);
         this.gameObjectManager = new GameObjectManager_1.GameObjectManager(this.assetFactory);
-        this.webSocket.Connect();
+        this.webSocket.connect();
         this.scene.onBeforeRenderObservable.add(() => {
             this.Update(this.getDeltaTime());
         });
@@ -273,25 +282,544 @@ class REngine {
     }
 }
 exports.REngine = REngine;
-},{"babylonjs":"node_modules\\babylonjs\\babylon.js","./AssetFactory":"src\\core\\AssetFactory.ts","./GameObjectManager":"src\\core\\GameObjectManager.ts"}],"src\\client\\networking\\WebSocketClient.ts":[function(require,module,exports) {
+},{"babylonjs":"node_modules\\babylonjs\\babylon.js","./AssetFactory":"src\\core\\AssetFactory.ts","./GameObjectManager":"src\\core\\GameObjectManager.ts"}],"node_modules\\nethandler\\lib\\Datatypes\\Float32.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Float32 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(4);
+        let dataView = new DataView(buffer);
+        dataView.setFloat32(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getFloat32(0);
+        return 4;
+    }
+}
+exports.Float32 = Float32;
+//# sourceMappingURL=Float32.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\Float64.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Float64 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(8);
+        let dataView = new DataView(buffer);
+        dataView.setFloat64(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getFloat64(0);
+        return 8;
+    }
+}
+exports.Float64 = Float64;
+//# sourceMappingURL=Float64.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\Int8.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Int8 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(1);
+        let dataView = new DataView(buffer);
+        dataView.setInt8(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getInt8(0);
+        return 1;
+    }
+}
+exports.Int8 = Int8;
+//# sourceMappingURL=Int8.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\Int16.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Int16 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(2);
+        let dataView = new DataView(buffer);
+        dataView.setInt16(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getInt16(0);
+        return 2;
+    }
+}
+exports.Int16 = Int16;
+//# sourceMappingURL=Int16.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\Int32.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Int32 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(4);
+        let dataView = new DataView(buffer);
+        dataView.setInt32(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getInt32(0);
+        return 4;
+    }
+}
+exports.Int32 = Int32;
+//# sourceMappingURL=Int32.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\NetArray.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class NetArray extends Array {
+    constructor(type) {
+        super();
+        this.type = type;
+    }
+    getNewArrayObject() {
+        return new this.type();
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(2);
+        let dataView = new DataView(buffer);
+        dataView.setUint16(0, this.length);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let dataView = new DataView(buffer);
+        this.length = dataView.getUint16(0);
+        return 2;
+    }
+}
+exports.NetArray = NetArray;
+//# sourceMappingURL=NetArray.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\NetText.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class NetText {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new Uint8Array(this.value.length + 1);
+        for (let i = 0; i < buffer.length - 1; i++) {
+            buffer[i] = this.value.charCodeAt(i);
+        }
+        buffer[buffer.length - 1] = 0;
+        return buffer.buffer;
+    }
+    SetBytes(buffer) {
+        let read = 0;
+        let dataView = new DataView(buffer);
+        this.value = "";
+        while (dataView.getUint8(read) != 0) {
+            this.value += String.fromCharCode(dataView.getUint8(read));
+            read++;
+        }
+        return read + 1;
+    }
+}
+exports.NetText = NetText;
+//# sourceMappingURL=NetText.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\UInt8.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class UInt8 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(1);
+        let dataView = new DataView(buffer);
+        dataView.setUint8(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getUint8(0);
+        return 1;
+    }
+}
+exports.UInt8 = UInt8;
+//# sourceMappingURL=UInt8.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\UInt16.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class UInt16 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(2);
+        let dataView = new DataView(buffer);
+        dataView.setUint16(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getUint16(0);
+        return 2;
+    }
+}
+exports.UInt16 = UInt16;
+//# sourceMappingURL=UInt16.js.map
+},{}],"node_modules\\nethandler\\lib\\Datatypes\\UInt32.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class UInt32 {
+    constructor(value = undefined) {
+        this.value = value;
+        if (value instanceof ArrayBuffer)
+            this.SetBytes(value);
+    }
+    Get() {
+        return this.value;
+    }
+    Set(value) {
+        this.value = value;
+    }
+    GetBytes() {
+        let buffer = new ArrayBuffer(4);
+        let dataView = new DataView(buffer);
+        dataView.setUint32(0, this.value);
+        return buffer;
+    }
+    SetBytes(buffer) {
+        let test = new DataView(buffer);
+        this.value = test.getUint32(0);
+        return 4;
+    }
+}
+exports.UInt32 = UInt32;
+//# sourceMappingURL=UInt32.js.map
+},{}],"node_modules\\nethandler\\lib\\DataTypeIndex.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Float32_1 = require("./Datatypes/Float32");
+exports.Float32 = Float32_1.Float32;
+var Float64_1 = require("./Datatypes/Float64");
+exports.Float64 = Float64_1.Float64;
+var Int8_1 = require("./Datatypes/Int8");
+exports.Int8 = Int8_1.Int8;
+var Int16_1 = require("./Datatypes/Int16");
+exports.Int16 = Int16_1.Int16;
+var Int32_1 = require("./Datatypes/Int32");
+exports.Int32 = Int32_1.Int32;
+var NetArray_1 = require("./Datatypes/NetArray");
+exports.NetArray = NetArray_1.NetArray;
+var NetText_1 = require("./Datatypes/NetText");
+exports.NetText = NetText_1.NetText;
+var UInt8_1 = require("./Datatypes/UInt8");
+exports.UInt8 = UInt8_1.UInt8;
+var UInt16_1 = require("./Datatypes/UInt16");
+exports.UInt16 = UInt16_1.UInt16;
+var UInt32_1 = require("./Datatypes/UInt32");
+exports.UInt32 = UInt32_1.UInt32;
+//# sourceMappingURL=DataTypeIndex.js.map
+},{"./Datatypes/Float32":"node_modules\\nethandler\\lib\\Datatypes\\Float32.js","./Datatypes/Float64":"node_modules\\nethandler\\lib\\Datatypes\\Float64.js","./Datatypes/Int8":"node_modules\\nethandler\\lib\\Datatypes\\Int8.js","./Datatypes/Int16":"node_modules\\nethandler\\lib\\Datatypes\\Int16.js","./Datatypes/Int32":"node_modules\\nethandler\\lib\\Datatypes\\Int32.js","./Datatypes/NetArray":"node_modules\\nethandler\\lib\\Datatypes\\NetArray.js","./Datatypes/NetText":"node_modules\\nethandler\\lib\\Datatypes\\NetText.js","./Datatypes/UInt8":"node_modules\\nethandler\\lib\\Datatypes\\UInt8.js","./Datatypes/UInt16":"node_modules\\nethandler\\lib\\Datatypes\\UInt16.js","./Datatypes/UInt32":"node_modules\\nethandler\\lib\\Datatypes\\UInt32.js"}],"node_modules\\nethandler\\lib\\Util.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Util {
+    static ConcatUint8Array(array1, array2) {
+        let resultArray = new Uint8Array(array1.length + array2.length);
+        resultArray.set(array1);
+        resultArray.set(array2, array1.length);
+        return resultArray;
+    }
+}
+exports.Util = Util;
+//# sourceMappingURL=Util.js.map
+},{}],"node_modules\\nethandler\\lib\\Factory.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Factory {
+    constructor(type) {
+        this.type = type;
+    }
+    CreateObject() {
+        return new this.type();
+    }
+}
+exports.Factory = Factory;
+//# sourceMappingURL=Factory.js.map
+},{}],"node_modules\\nethandler\\lib\\NetHandler.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Util_1 = require("./Util");
+const UInt16_1 = require("./Datatypes/UInt16");
+const NetArray_1 = require("./Datatypes/NetArray");
+const Factory_1 = require("./Factory");
+class NetHandler {
+    constructor() {
+        this.handleFunctions = new Map();
+        this.OnConnect = null;
+    }
+    Handle(data, payload) {
+        let read = 0;
+        let buffer = new Uint8Array(data);
+        let packetId = new UInt16_1.UInt16(data);
+        if (this.handleFunctions.has(packetId.Get())) {
+            let handleFunction = this.handleFunctions.get(packetId.Get());
+            let returnObject = handleFunction.Factory.CreateObject();
+            this.setBytesCustomObject(returnObject, data);
+            handleFunction.HandleFunction(returnObject, payload);
+        }
+        //else console.log("no handler for packetid: " + packetId.Get());
+    }
+    AddHandle(classType, func) {
+        let classObject = new classType();
+        let packetId = classObject.GetPacketId();
+        let factory = new Factory_1.Factory(classType);
+        if (!this.handleFunctions.has(packetId)) {
+            this.handleFunctions.set(packetId, new HandleFunction(factory, func));
+        }
+    }
+    PacketToArrayBuffer(packet) {
+        return this.readBytesCustomObject(packet);
+    }
+    readBytesCustomObject(classObject) {
+        let arrayBuffer = new Uint8Array(0);
+        let objectValues = Object.values(classObject);
+        objectValues.forEach(element => {
+            if (!element['GetBytes']) {
+                arrayBuffer = Util_1.Util.ConcatUint8Array(arrayBuffer, new Uint8Array(this.readBytesCustomObject(element)));
+            }
+            else {
+                if (element instanceof NetArray_1.NetArray) {
+                    let netArray = element;
+                    arrayBuffer = Util_1.Util.ConcatUint8Array(arrayBuffer, new Uint8Array(element.GetBytes()));
+                    arrayBuffer = Util_1.Util.ConcatUint8Array(arrayBuffer, new Uint8Array(this.readBytesCustomObject(netArray)));
+                }
+                else {
+                    arrayBuffer = Util_1.Util.ConcatUint8Array(arrayBuffer, new Uint8Array(element.GetBytes()));
+                }
+            }
+        });
+        return arrayBuffer.buffer;
+    }
+    setBytesCustomObject(referenceObject, data) {
+        let objectValues = Object.values(referenceObject);
+        let read = 0;
+        objectValues.forEach(element => {
+            if (!element['GetBytes']) {
+                read += this.setBytesCustomObject(element, data.slice(read));
+            }
+            else {
+                if (element instanceof NetArray_1.NetArray) {
+                    let netArray = element;
+                    read += element.SetBytes(data.slice(read));
+                    let length = netArray.length;
+                    netArray.splice(0);
+                    for (let i = 0; i < length; i++) {
+                        netArray.push(netArray.getNewArrayObject());
+                        if (!netArray[i]['GetBytes']) {
+                            read += this.setBytesCustomObject(netArray[i], data.slice(read));
+                        }
+                        else {
+                            read += netArray[i].SetBytes(data.slice(read));
+                        }
+                    }
+                }
+                else {
+                    read += element.SetBytes(data.slice(read));
+                }
+            }
+        });
+        return read;
+    }
+}
+exports.NetHandler = NetHandler;
+class HandleFunction {
+    constructor(factory, handleFunction) {
+        this.Factory = factory;
+        this.HandleFunction = handleFunction;
+    }
+}
+;
+//# sourceMappingURL=NetHandler.js.map
+},{"./Util":"node_modules\\nethandler\\lib\\Util.js","./Datatypes/UInt16":"node_modules\\nethandler\\lib\\Datatypes\\UInt16.js","./Datatypes/NetArray":"node_modules\\nethandler\\lib\\Datatypes\\NetArray.js","./Factory":"node_modules\\nethandler\\lib\\Factory.js"}],"node_modules\\nethandler\\lib\\Packet.js":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const UInt16_1 = require("./Datatypes/UInt16");
+class Packet {
+    constructor(packetId) {
+        this.PacketId = new UInt16_1.UInt16(packetId);
+    }
+    GetPacketId() {
+        return this.PacketId.Get();
+    }
+}
+exports.Packet = Packet;
+//# sourceMappingURL=Packet.js.map
+},{"./Datatypes/UInt16":"node_modules\\nethandler\\lib\\Datatypes\\UInt16.js"}],"node_modules\\nethandler\\lib\\Index.js":[function(require,module,exports) {
+"use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+const DataTypes = __importStar(require("./DataTypeIndex"));
+exports.DataTypes = DataTypes;
+var NetHandler_1 = require("./NetHandler");
+exports.NetHandler = NetHandler_1.NetHandler;
+var Packet_1 = require("./Packet");
+exports.Packet = Packet_1.Packet;
+//# sourceMappingURL=Index.js.map
+},{"./DataTypeIndex":"node_modules\\nethandler\\lib\\DataTypeIndex.js","./NetHandler":"node_modules\\nethandler\\lib\\NetHandler.js","./Packet":"node_modules\\nethandler\\lib\\Packet.js"}],"src\\core\\networking\\BasicHandler.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class WebSocketClient {
-    constructor(websocketUrl) {
-        this.websocketUrl = websocketUrl;
-        this.socket = null;
+const nethandler_1 = require("nethandler");
+class BasicHandler extends nethandler_1.NetHandler {
+    constructor(webSocketHost) {
+        super();
+        this.webSocketHost = webSocketHost;
     }
-    Connect() {
-        this.socket = new WebSocket(this.websocketUrl);
+}
+exports.BasicHandler = BasicHandler;
+},{"nethandler":"node_modules\\nethandler\\lib\\Index.js"}],"src\\client\\networking\\Handler.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const BasicHandler_1 = require("../../core/networking/BasicHandler");
+class Handler extends BasicHandler_1.BasicHandler {
+    constructor(webSocketHost) {
+        super();
+        this.webSocketHost = webSocketHost;
     }
-    GetId() {
+    OnConnection() {
         throw new Error("Method not implemented.");
     }
-    Send(packet) {}
+}
+exports.Handler = Handler;
+},{"../../core/networking/BasicHandler":"src\\core\\networking\\BasicHandler.ts"}],"src\\core\\networking\\RWebSocketHost.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RWebSocketHost {
+    constructor(gameObjectManager) {
+        this.gameObjectManager = gameObjectManager;
+    }
+    getGameObjectManager() {
+        return this.gameObjectManager;
+    }
+}
+exports.RWebSocketHost = RWebSocketHost;
+},{}],"src\\client\\networking\\WebSocketClient.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const Handler_1 = require("./Handler");
+const RWebSocketHost_1 = require("../../core/networking/RWebSocketHost");
+class WebSocketClient extends RWebSocketHost_1.RWebSocketHost {
+    constructor(websocketUrl, gameObjectManager) {
+        super(gameObjectManager);
+        this.websocketUrl = websocketUrl;
+        this.socket = null;
+        this.handler = new Handler_1.Handler(this);
+        this.id = -1;
+    }
+    connect() {
+        this.socket = new WebSocket(this.websocketUrl);
+    }
+    setId(id) {
+        if (this.id == -1) this.id = id;
+    }
+    getId() {
+        return this.id;
+    }
+    send(packet) {
+        this.socket.send(this.handler.PacketToArrayBuffer(packet));
+    }
 }
 exports.WebSocketClient = WebSocketClient;
-},{}],"src\\client\\RClient.ts":[function(require,module,exports) {
+},{"./Handler":"src\\client\\networking\\Handler.ts","../../core/networking/RWebSocketHost":"src\\core\\networking\\RWebSocketHost.ts"}],"src\\client\\RClient.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -309,13 +837,13 @@ exports.RClient = RClient;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const RClient_1 = require("../src/client/RClient");
+const RClient_1 = require("./client/RClient");
 window.addEventListener('DOMContentLoaded', function () {
     let canvas = document.getElementById("renderCanvas");
     let client = new RClient_1.RClient(canvas, "ws://127.0.0.1:1337");
     client.getAssetManager().load();
 });
-},{"../src/client/RClient":"src\\client\\RClient.ts"}],"..\\..\\..\\..\\AppData\\Roaming\\npm\\node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
+},{"./client/RClient":"src\\client\\RClient.ts"}],"..\\..\\..\\..\\AppData\\Roaming\\npm\\node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 

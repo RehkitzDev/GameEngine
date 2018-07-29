@@ -1,20 +1,14 @@
 import { NetHandler } from "nethandler"
+import { GameObjectManager } from "../GameObjectManager";
+import { RWebSocketHost } from "./RWebSocketHost";
 
-export class BasicHandler extends NetHandler{
+export abstract class BasicHandler extends NetHandler{
 
-    //WebSocket message mit der Handle Function verkuppeln
-    //Ka was onconnect soll
+    protected webSocketHost: RWebSocketHost;
 
-    // Basic Handler für server + client erstellen damit man die standard sachen wie id's
-    // und gameobject movement hat
-
-    constructor(){
+    constructor(webSocketHost: RWebSocketHost){
         super();
-        this.OnConnect = () => {this.OnConnection()};
-    }
-
-    public OnConnection(){
-
+        this.webSocketHost = webSocketHost;
     }
 
 }
