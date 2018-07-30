@@ -56,15 +56,17 @@ export class GameObjectManager{
 
     public update(deletaTime: number){
         this.gameObjects.forEach((gameObject: GameObject) => {
-            gameObject.Update(deletaTime);
+            gameObject.update(deletaTime);
         });
 
         this.networkedGameObjects.forEach((gameObject: GameObject, id: number) => {
-            gameObject.Update(deletaTime);
+            gameObject.update(deletaTime);
         });
     }
 
     public netWorkUpdate(deltaTime: number){
-        console.log("todo: network update");
+        this.networkedGameObjects.forEach((gameObject: NetGameObject, id: number) => {
+            gameObject.networkedUpdate(deltaTime);
+        });
     }
 }

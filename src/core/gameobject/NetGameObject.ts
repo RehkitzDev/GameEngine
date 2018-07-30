@@ -14,4 +14,5 @@ export abstract class NetGameObject extends GameObject{
         return this.id;
     }
 
+    public abstract networkedUpdate(deltaTime: number): void;
 }

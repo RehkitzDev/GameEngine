@@ -227,14 +227,16 @@ class GameObjectManager {
     }
     update(deletaTime) {
         this.gameObjects.forEach(gameObject => {
-            gameObject.Update(deletaTime);
+            gameObject.update(deletaTime);
         });
         this.networkedGameObjects.forEach((gameObject, id) => {
-            gameObject.Update(deletaTime);
+            gameObject.update(deletaTime);
         });
     }
     netWorkUpdate(deltaTime) {
-        console.log("todo: network update");
+        this.networkedGameObjects.forEach((gameObject, id) => {
+            gameObject.networkedUpdate(deltaTime);
+        });
     }
 }
 exports.GameObjectManager = GameObjectManager;
@@ -246,10 +248,10 @@ const babylonjs_1 = require("babylonjs");
 const AssetFactory_1 = require("./AssetFactory");
 const GameObjectManager_1 = require("./GameObjectManager");
 class REngine {
-    constructor(babylonEngine, networtUpdateTime, wsHost) {
+    constructor(babylonEngine, networkUpdateTime, wsHost) {
         this.babylonEngine = babylonEngine;
         this.wsHost = wsHost;
-        this.netWorkUpdateTime = networtUpdateTime;
+        this.netWorkUpdateTime = 1 / networkUpdateTime;
         this.netWorkCurrentUpdateTime = 0;
         this.scene = new babylonjs_1.Scene(this.babylonEngine);
         this.assetManager = new babylonjs_1.AssetsManager(this.scene);
@@ -258,6 +260,9 @@ class REngine {
         this.assetManager.onFinish = tasks => {
             this.init();
         };
+    }
+    getScene() {
+        return this.scene;
     }
     getDeltaTime() {
         return this.babylonEngine.getDeltaTime() / 1000;
@@ -272,10 +277,13 @@ class REngine {
         return this.gameObjectManager;
     }
     Update(deltaTime) {
+        console.log("update");
         this.gameObjectManager.update(deltaTime);
+        this.netWorkCurrentUpdateTime += deltaTime;
         if (this.netWorkCurrentUpdateTime >= this.netWorkUpdateTime) this.NetWorkUpdate(this.netWorkCurrentUpdateTime);
     }
     NetWorkUpdate(deltaTime) {
+        console.log("network update");
         this.gameObjectManager.netWorkUpdate(deltaTime);
         this.netWorkCurrentUpdateTime = 0;
     }
@@ -286,13 +294,72 @@ class REngine {
         this.scene.onBeforeRenderObservable.add(() => {
             this.Update(this.getDeltaTime());
         });
-        if (!(this.babylonEngine instanceof babylonjs_1.NullEngine)) this.babylonEngine.runRenderLoop(() => {
+        this.babylonEngine.runRenderLoop(() => {
             this.scene.render();
         });
     }
 }
 exports.REngine = REngine;
-},{"babylonjs":"node_modules\\babylonjs\\babylon.js","./AssetFactory":"src\\core\\AssetFactory.ts","./GameObjectManager":"src\\core\\GameObjectManager.ts"}],"node_modules\\nethandler\\lib\\Datatypes\\Float32.js":[function(require,module,exports) {
+},{"babylonjs":"node_modules\\babylonjs\\babylon.js","./AssetFactory":"src\\core\\AssetFactory.ts","./GameObjectManager":"src\\core\\GameObjectManager.ts"}],"src\\core\\networking\\RWebSocketHost.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class RWebSocketHost {
+    constructor(handler) {
+        this.handler = handler;
+        this.handler.init(this);
+        this.gameObjectManager = null;
+    }
+    connect(gameObjectManager) {
+        this.gameObjectManager = gameObjectManager;
+        this.init();
+    }
+    getGameObjectManager() {
+        return this.gameObjectManager;
+    }
+}
+exports.RWebSocketHost = RWebSocketHost;
+},{}],"src\\client\\networking\\WebSocketClient.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const RWebSocketHost_1 = require("../../core/networking/RWebSocketHost");
+class WebSocketClient extends RWebSocketHost_1.RWebSocketHost {
+    constructor(websocketUrl, handler) {
+        super(handler);
+        this.websocketUrl = websocketUrl;
+        this.socket = null;
+        this.id = -1;
+    }
+    init() {
+        this.socket = new WebSocket(this.websocketUrl);
+    }
+    setId(id) {
+        if (this.id == -1) this.id = id;
+    }
+    getId() {
+        return this.id;
+    }
+    send(packet) {
+        this.socket.send(this.handler.PacketToArrayBuffer(packet));
+    }
+}
+exports.WebSocketClient = WebSocketClient;
+},{"../../core/networking/RWebSocketHost":"src\\core\\networking\\RWebSocketHost.ts"}],"src\\client\\RClient.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const REngine_1 = require("../core/REngine");
+const babylonjs_1 = require("babylonjs");
+const WebSocketClient_1 = require("./networking/WebSocketClient");
+class RClient extends REngine_1.REngine {
+    constructor(canvas, networkUpdatesPerSecond, wsAdress, handler) {
+        super(new babylonjs_1.Engine(canvas), networkUpdatesPerSecond, new WebSocketClient_1.WebSocketClient(wsAdress, handler));
+        console.log("success");
+    }
+}
+exports.RClient = RClient;
+},{"../core/REngine":"src\\core\\REngine.ts","babylonjs":"node_modules\\babylonjs\\babylon.js","./networking/WebSocketClient":"src\\client\\networking\\WebSocketClient.ts"}],"node_modules\\nethandler\\lib\\Datatypes\\Float32.js":[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Float32 {
@@ -767,8 +834,11 @@ exports.Packet = Packet_1.Packet;
 Object.defineProperty(exports, "__esModule", { value: true });
 const nethandler_1 = require("nethandler");
 class BasicHandler extends nethandler_1.NetHandler {
-    constructor(webSocketHost) {
+    constructor() {
         super();
+        this.webSocketHost = null;
+    }
+    init(webSocketHost) {
         this.webSocketHost = webSocketHost;
     }
 }
@@ -779,8 +849,8 @@ exports.BasicHandler = BasicHandler;
 Object.defineProperty(exports, "__esModule", { value: true });
 const BasicHandler_1 = require("../../core/networking/BasicHandler");
 class Handler extends BasicHandler_1.BasicHandler {
-    constructor(webSocketHost) {
-        super(webSocketHost);
+    constructor() {
+        super();
         this.OnConnect = this.OnConnection;
     }
     OnConnection() {
@@ -788,77 +858,21 @@ class Handler extends BasicHandler_1.BasicHandler {
     }
 }
 exports.Handler = Handler;
-},{"../../core/networking/BasicHandler":"src\\core\\networking\\BasicHandler.ts"}],"src\\core\\networking\\RWebSocketHost.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class RWebSocketHost {
-    constructor(handler) {
-        this.handler = handler;
-        this.gameObjectManager = null;
-    }
-    connect(gameObjectManager) {
-        this.gameObjectManager = gameObjectManager;
-        this.init();
-    }
-    getGameObjectManager() {
-        return this.gameObjectManager;
-    }
-}
-exports.RWebSocketHost = RWebSocketHost;
-},{}],"src\\client\\networking\\WebSocketClient.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const Handler_1 = require("./Handler");
-const RWebSocketHost_1 = require("../../core/networking/RWebSocketHost");
-class WebSocketClient extends RWebSocketHost_1.RWebSocketHost {
-    constructor(websocketUrl, handler) {
-        super(handler);
-        this.websocketUrl = websocketUrl;
-        this.socket = null;
-        this.handler = new Handler_1.Handler(this);
-        this.id = -1;
-    }
-    init() {
-        this.socket = new WebSocket(this.websocketUrl);
-    }
-    setId(id) {
-        if (this.id == -1) this.id = id;
-    }
-    getId() {
-        return this.id;
-    }
-    send(packet) {
-        this.socket.send(this.handler.PacketToArrayBuffer(packet));
-    }
-}
-exports.WebSocketClient = WebSocketClient;
-},{"./Handler":"src\\client\\networking\\Handler.ts","../../core/networking/RWebSocketHost":"src\\core\\networking\\RWebSocketHost.ts"}],"src\\client\\RClient.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const REngine_1 = require("../core/REngine");
-const babylonjs_1 = require("babylonjs");
-const WebSocketClient_1 = require("./networking/WebSocketClient");
-class RClient extends REngine_1.REngine {
-    constructor(canvas, wsAdress, handler) {
-        super(new babylonjs_1.Engine(canvas), new WebSocketClient_1.WebSocketClient(wsAdress, handler));
-        console.log("success");
-    }
-}
-exports.RClient = RClient;
-},{"../core/REngine":"src\\core\\REngine.ts","babylonjs":"node_modules\\babylonjs\\babylon.js","./networking/WebSocketClient":"src\\client\\networking\\WebSocketClient.ts"}],"src\\clientFile.ts":[function(require,module,exports) {
+},{"../../core/networking/BasicHandler":"src\\core\\networking\\BasicHandler.ts"}],"src\\clientFile.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const RClient_1 = require("./client/RClient");
+const Handler_1 = require("./client/networking/Handler");
+const babylonjs_1 = require("babylonjs");
 window.addEventListener('DOMContentLoaded', function () {
     let canvas = document.getElementById("renderCanvas");
-    let client = new RClient_1.RClient(canvas, "ws://127.0.0.1:1337");
+    let client = new RClient_1.RClient(canvas, 30, "ws://127.0.0.1:1337", new Handler_1.Handler());
+    let light = new babylonjs_1.HemisphericLight("HemiLight", new babylonjs_1.Vector3(0, 1, 0), client.getScene());
+    let camera = new babylonjs_1.FreeCamera("FreeCamera", new BABYLON.Vector3(0, -8, -20), client.getScene());
     client.getAssetManager().load();
 });
-},{"./client/RClient":"src\\client\\RClient.ts"}],"..\\..\\..\\..\\AppData\\Roaming\\npm\\node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
+},{"./client/RClient":"src\\client\\RClient.ts","./client/networking/Handler":"src\\client\\networking\\Handler.ts","babylonjs":"node_modules\\babylonjs\\babylon.js"}],"..\\..\\..\\..\\AppData\\Roaming\\npm\\node_modules\\parcel-bundler\\src\\builtins\\hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -885,9 +899,9 @@ module.bundle.Module = Module;
 
 var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = undefined || location.hostname;
+  var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '53777' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '56270' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 

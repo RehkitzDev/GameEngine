@@ -16,7 +16,6 @@ export class WebSocketServer extends RWebSocketHost {
         super(handler);
         this.wsServer = null;
         this.port = port;
-        this.handler = new Handler(this);
     }
 
     init(): void {

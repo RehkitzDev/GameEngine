@@ -8,6 +8,7 @@ export abstract class RWebSocketHost{
 
     constructor(handler: BasicHandler){
         this.handler = handler;
+        this.handler.init(this);
         this.gameObjectManager = null;
     }
 

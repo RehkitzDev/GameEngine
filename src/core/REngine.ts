@@ -16,11 +16,11 @@ export class REngine{
     private netWorkUpdateTime: number;
     private netWorkCurrentUpdateTime: number;
 
-    constructor(babylonEngine: Engine,networtUpdateTime: number, wsHost: RWebSocketHost){
+    constructor(babylonEngine: Engine,networkUpdateTime: number, wsHost: RWebSocketHost){
         this.babylonEngine = babylonEngine;
         this.wsHost = wsHost;
 
-        this.netWorkUpdateTime = networtUpdateTime;
+        this.netWorkUpdateTime = 1 / networkUpdateTime;
         this.netWorkCurrentUpdateTime = 0;
 
         this.scene = new Scene(this.babylonEngine);
@@ -28,6 +28,10 @@ export class REngine{
         this.assetFactory = null;
         this.gameObjectManager = null;
         this.assetManager.onFinish = (tasks: AbstractAssetTask[]) => {  this.init(); };
+    }
+
+    public getScene(): Scene{
+        return this.scene;
     }
 
     public getDeltaTime(): number{
@@ -47,13 +51,16 @@ export class REngine{
     }
 
     public Update(deltaTime: number){
+        console.log("update");
         this.gameObjectManager!.update(deltaTime);
 
+        this.netWorkCurrentUpdateTime += deltaTime;
         if(this.netWorkCurrentUpdateTime >= this.netWorkUpdateTime)
             this.NetWorkUpdate(this.netWorkCurrentUpdateTime);
     }
 
     public NetWorkUpdate(deltaTime: number){
+        console.log("network update");
         this.gameObjectManager!.netWorkUpdate(deltaTime);
         this.netWorkCurrentUpdateTime = 0;
     }
@@ -67,8 +74,7 @@ export class REngine{
             this.Update(this.getDeltaTime());
         });
 
-        if(!(this.babylonEngine instanceof NullEngine))
-            this.babylonEngine.runRenderLoop(() => { this.scene.render(); });
+        this.babylonEngine.runRenderLoop(() => { this.scene.render(); });
     }
 
     

@@ -4,8 +4,8 @@ import { WebSocketServer } from "./WebSocketServer";
 
 export class Handler extends BasicHandler{
 
-    constructor(webSocketHost: WebSocketServer){
-        super(webSocketHost);
+    constructor(){
+        super();
         this.OnConnect = this.OnConnection;
     }
 

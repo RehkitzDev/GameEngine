@@ -13,7 +13,6 @@ export class WebSocketClient extends RWebSocketHost{
         super(handler);
         this.websocketUrl = websocketUrl;
         this.socket = null;
-        this.handler = new Handler(this);
         this.id = -1;
     }
 

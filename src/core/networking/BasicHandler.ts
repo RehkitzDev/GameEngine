@@ -4,10 +4,14 @@ import { RWebSocketHost } from "./RWebSocketHost";
 
 export abstract class BasicHandler extends NetHandler{
 
-    protected webSocketHost: RWebSocketHost;
+    protected webSocketHost: RWebSocketHost | null;
 
-    constructor(webSocketHost: RWebSocketHost){
+    constructor(){
         super();
+        this.webSocketHost = null;
+    }
+
+    public init(webSocketHost: RWebSocketHost){
         this.webSocketHost = webSocketHost;
     }
 
