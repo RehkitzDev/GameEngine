@@ -18,6 +18,10 @@ export class GameObjectManager{
         this.connectedPlayers = new Map<number, ConnectedPlayer>();
     }
 
+    public addNetWorkUpdate(func: Function){
+        
+    }
+
     public getFreePlayerId(): number{
         for(let i=0; i < 65535; i++)
             if(!this.connectedPlayers.has(i))

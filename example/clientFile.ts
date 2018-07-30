@@ -1,5 +1,4 @@
-import { RClient } from "./client/RClient";
-import { Handler } from "./client/networking/Handler";
+import { RClient } from "../src/client/RClient";
 import { HemisphericLight, Vector3, FreeCamera } from "babylonjs";
 
 window.addEventListener('DOMContentLoaded', function(){ 

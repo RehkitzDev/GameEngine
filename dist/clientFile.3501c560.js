@@ -333,6 +333,16 @@ class WebSocketClient extends RWebSocketHost_1.RWebSocketHost {
     }
     init() {
         this.socket = new WebSocket(this.websocketUrl);
+        this.socket.binaryType = "arraybuffer";
+        this.socket.onopen = event => {
+            this.handler.OnConnect(event);
+        };
+        this.socket.onmessage = event => {
+            this.onMessage(event);
+        };
+    }
+    onMessage(msg) {
+        if (msg.type != "string") this.handler.Handle(msg.data, {});
     }
     setId(id) {
         if (this.id == -1) this.id = id;

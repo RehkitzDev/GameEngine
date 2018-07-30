@@ -281,11 +281,21 @@ class WebSocketServer extends RWebSocketHost_1.RWebSocketHost {
             console.log("websocket listening on port " + this.port);
         });
         this.wsServer.addListener("connection", this.onPlayerConnection);
+        this.wsServer.addListener("error", error => {
+            console.log(error);
+        });
     }
     onPlayerConnection(ws) {
         console.log("websocket connection");
-        console.log(ws);
-        //ws.addEventListener("message")
+        this.handler.OnConnect(ws);
+        ws.on("message", message => {
+            let arrayBuffer = message.buffer.slice(message.byteOffset, message.byteOffset + message.byteLength);
+            this.handler.Handle(arrayBuffer, ws);
+        });
+        ws.on('close', (code, reason) => {
+            console.log("some1 disconnected");
+            this.handler.DisconnectHandle(ws);
+        });
     }
     onPlayerMessage() {}
 }

@@ -1,5 +1,4 @@
-import { RServer } from "./server/RServer";
-import { Handler } from "./server/networking/Handler";
+import { RServer } from "../src/server/RServer";
 import { HemisphericLight, Vector3, FreeCamera } from "babylonjs";
 
 

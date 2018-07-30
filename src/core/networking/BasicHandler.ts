@@ -15,4 +15,7 @@ export abstract class BasicHandler extends NetHandler{
         this.webSocketHost = webSocketHost;
     }
 
+    abstract onConnect(object: Object): void;
+    abstract onDisconnect(object: Object): void;
+
 }
