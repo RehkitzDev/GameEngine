@@ -63,4 +63,8 @@ export class GameObjectManager{
             gameObject.Update(deletaTime);
         });
     }
+
+    public netWorkUpdate(deltaTime: number){
+        console.log("todo: network update");
+    }
 }

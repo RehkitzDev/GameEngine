@@ -3,23 +3,23 @@ import * as ws from "ws";
 import{ Packet, NetHandler, DataTypes } from "nethandler";
 import { Server } from "http";
 import { GameObjectManager } from "../../core/GameObjectManager";
+import { RWebSocketHost } from "../../core/networking/RWebSocketHost";
+import { Handler } from "./Handler";
 
 
 
-export class WebSocketServer {
-
-    private gameObjectManager: GameObjectManager;
+export class WebSocketServer extends RWebSocketHost {
     private wsServer: ws.Server | null;
     private port: number;
 
-    constructor(port: number, gameObjectManager: GameObjectManager){
-        super();
+    constructor(port: number, handler: Handler){
+        super(handler);
         this.wsServer = null;
         this.port = port;
-        this.gameObjectManager = gameObjectManager;
+        this.handler = new Handler(this);
     }
 
-    public connect(): void {
+    init(): void {
         this.wsServer = new ws.Server({port: this.port});
         this.wsServer.on("listening", () => { console.log("websocket listening on port "+ this.port); });
         this.wsServer.addListener("connection", this.onPlayerConnection); 

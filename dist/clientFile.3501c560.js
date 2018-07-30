@@ -233,6 +233,9 @@ class GameObjectManager {
             gameObject.Update(deletaTime);
         });
     }
+    netWorkUpdate(deltaTime) {
+        console.log("todo: network update");
+    }
 }
 exports.GameObjectManager = GameObjectManager;
 },{}],"src\\core\\REngine.ts":[function(require,module,exports) {
@@ -243,9 +246,11 @@ const babylonjs_1 = require("babylonjs");
 const AssetFactory_1 = require("./AssetFactory");
 const GameObjectManager_1 = require("./GameObjectManager");
 class REngine {
-    constructor(babylonEngine, ws) {
+    constructor(babylonEngine, networtUpdateTime, wsHost) {
         this.babylonEngine = babylonEngine;
-        this.webSocket = ws;
+        this.wsHost = wsHost;
+        this.netWorkUpdateTime = networtUpdateTime;
+        this.netWorkCurrentUpdateTime = 0;
         this.scene = new babylonjs_1.Scene(this.babylonEngine);
         this.assetManager = new babylonjs_1.AssetsManager(this.scene);
         this.assetFactory = null;
@@ -268,11 +273,16 @@ class REngine {
     }
     Update(deltaTime) {
         this.gameObjectManager.update(deltaTime);
+        if (this.netWorkCurrentUpdateTime >= this.netWorkUpdateTime) this.NetWorkUpdate(this.netWorkCurrentUpdateTime);
+    }
+    NetWorkUpdate(deltaTime) {
+        this.gameObjectManager.netWorkUpdate(deltaTime);
+        this.netWorkCurrentUpdateTime = 0;
     }
     init() {
         this.assetFactory = new AssetFactory_1.AssetFactory(this.scene);
         this.gameObjectManager = new GameObjectManager_1.GameObjectManager(this.assetFactory);
-        this.webSocket.connect();
+        this.wsHost.connect(this.gameObjectManager);
         this.scene.onBeforeRenderObservable.add(() => {
             this.Update(this.getDeltaTime());
         });
@@ -770,8 +780,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const BasicHandler_1 = require("../../core/networking/BasicHandler");
 class Handler extends BasicHandler_1.BasicHandler {
     constructor(webSocketHost) {
-        super();
-        this.webSocketHost = webSocketHost;
+        super(webSocketHost);
+        this.OnConnect = this.OnConnection;
     }
     OnConnection() {
         throw new Error("Method not implemented.");
@@ -783,8 +793,13 @@ exports.Handler = Handler;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 class RWebSocketHost {
-    constructor(gameObjectManager) {
+    constructor(handler) {
+        this.handler = handler;
+        this.gameObjectManager = null;
+    }
+    connect(gameObjectManager) {
         this.gameObjectManager = gameObjectManager;
+        this.init();
     }
     getGameObjectManager() {
         return this.gameObjectManager;
@@ -798,14 +813,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Handler_1 = require("./Handler");
 const RWebSocketHost_1 = require("../../core/networking/RWebSocketHost");
 class WebSocketClient extends RWebSocketHost_1.RWebSocketHost {
-    constructor(websocketUrl, gameObjectManager) {
-        super(gameObjectManager);
+    constructor(websocketUrl, handler) {
+        super(handler);
         this.websocketUrl = websocketUrl;
         this.socket = null;
         this.handler = new Handler_1.Handler(this);
         this.id = -1;
     }
-    connect() {
+    init() {
         this.socket = new WebSocket(this.websocketUrl);
     }
     setId(id) {
@@ -827,8 +842,8 @@ const REngine_1 = require("../core/REngine");
 const babylonjs_1 = require("babylonjs");
 const WebSocketClient_1 = require("./networking/WebSocketClient");
 class RClient extends REngine_1.REngine {
-    constructor(canvas, wsAdress) {
-        super(new babylonjs_1.Engine(canvas), new WebSocketClient_1.WebSocketClient(wsAdress));
+    constructor(canvas, wsAdress, handler) {
+        super(new babylonjs_1.Engine(canvas), new WebSocketClient_1.WebSocketClient(wsAdress, handler));
         console.log("success");
     }
 }

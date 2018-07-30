@@ -3,18 +3,23 @@ import { BasicHandler } from "./BasicHandler";
 
 export abstract class RWebSocketHost{
     
-    protected gameObjectManager: GameObjectManager;
-    protected abstract handler: BasicHandler;
+    protected gameObjectManager: GameObjectManager | null;
+    protected handler: BasicHandler;
 
-    constructor(gameObjectManager: GameObjectManager){
-        this.gameObjectManager = gameObjectManager;
+    constructor(handler: BasicHandler){
+        this.handler = handler;
+        this.gameObjectManager = null;
     }
 
-    abstract connect(): void;
-    abstract onConnection(): void;
+    protected abstract init(): void;
+
+    public connect(gameObjectManager: GameObjectManager){
+        this.gameObjectManager = gameObjectManager;
+        this.init();
+    }
 
     public getGameObjectManager(): GameObjectManager{
-        return this.gameObjectManager;
+        return this.gameObjectManager!;
     }
 
 }
